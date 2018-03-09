@@ -1,11 +1,12 @@
 resource "aws_instance" "kafka" {
-  count = "${var.count}"
-  ami = "${var.ami_id}"
-  key_name = "datalake"
-  instance_type = "${var.instance_type}"
-  iam_instance_profile = "${var.iam_instance_profile}"
-  subnet_id = "${element(var.subnet_ids, count.index % length(var.subnet_ids))}"
-  vpc_security_group_ids = [ "${var.sg_ids}" ]
+  count                  = "${var.count}"
+  ami                    = "${var.ami_id}"
+  key_name               = "datalake"
+  instance_type          = "${var.instance_type}"
+  iam_instance_profile   = "${var.iam_instance_profile}"
+  subnet_id              = "${element(var.subnet_ids, count.index % length(var.subnet_ids))}"
+  vpc_security_group_ids = ["${var.sg_ids}"]
+
   tags = {
     Name = "${format("%s-%d", var.tag_name, count.index + 1)}"
   }
@@ -14,13 +15,13 @@ resource "aws_instance" "kafka" {
 resource "null_resource" "provision-kafka-ebs" {
   count = "${var.count}"
 
-  depends_on = [ "aws_volume_attachment.kafka-ebs-attach" ]
+  depends_on = ["aws_volume_attachment.kafka-ebs-attach"]
 
   connection {
-    user = "${var.ssh_user}"
-    host = "${element(aws_instance.kafka.*.private_ip, count.index)}"
-    agent = true
-    private_key = "${file("${var.ssh_identity_file}")}"
+    user        = "${var.ssh_user}"
+    host        = "${element(aws_instance.kafka.*.private_ip, count.index)}"
+    agent       = true
+    private_key = "${file("${var.ssh_key_pair_file}")}"
   }
 
   provisioner "remote-exec" {
@@ -29,25 +30,25 @@ resource "null_resource" "provision-kafka-ebs" {
       "sudo apt-get install xfsprogs -y",
       "sudo mkfs.xfs -f -s size=4096 -d sunit=8 -d swidth=256 /dev/xvdh",
       "sudo mount -t xfs /dev/xvdh /var/lib/kafka",
-      "printf '/dev/xvdh\t/var/lib/kafka\txfs\tdefaults\t0 0' | sudo tee --append /etc/fstab"
+      "printf '/dev/xvdh\t/var/lib/kafka\txfs\tdefaults\t0 0' | sudo tee --append /etc/fstab",
     ]
   }
 }
 
 resource "null_resource" "provision-kafka" {
   count = "${var.count}"
-  
-  depends_on = [ "null_resource.provision-kafka-ebs" ]
+
+  depends_on = ["null_resource.provision-kafka-ebs"]
 
   triggers {
     revision = "${var.rev}"
   }
 
   connection {
-    user = "${var.ssh_user}"
-    host = "${element(aws_instance.kafka.*.private_ip, count.index)}"
-    agent = true
-    private_key = "${file("${var.ssh_identity_file}")}"
+    user        = "${var.ssh_user}"
+    host        = "${element(aws_instance.kafka.*.private_ip, count.index)}"
+    agent       = true
+    private_key = "${file("${var.ssh_key_pair_file}")}"
   }
 
   provisioner "remote-exec" {
@@ -56,27 +57,27 @@ resource "null_resource" "provision-kafka" {
       "sudo service kafka stop || true",
       "sudo rm -rf /opt/kafka/* || true",
       "sudo rm -rf /tmp/cassy-up/*",
-      "sudo rm /etc/init.d/kafka || true"
+      "sudo rm /etc/init.d/kafka || true",
     ]
   }
 
   provisioner "file" {
-    source = "${var.provisioning_scripts}/oracle-jdk"
+    source      = "${var.provisioning_scripts}/oracle-jdk"
     destination = "/tmp/cassy-up"
   }
 
   provisioner "file" {
-    source = "${var.provisioning_scripts}/environments/aws/oracle-jdk.sh"
+    source      = "${var.provisioning_scripts}/environments/aws/oracle-jdk.sh"
     destination = "/tmp/cassy-up/oracle-jdk.sh"
   }
 
   provisioner "file" {
-    source = "${var.provisioning_scripts}/apache-kafka"
+    source      = "${var.provisioning_scripts}/apache-kafka"
     destination = "/tmp/cassy-up"
   }
 
   provisioner "file" {
-    source = "${var.provisioning_scripts}/environments/aws/kafka.sh"
+    source      = "${var.provisioning_scripts}/environments/aws/kafka.sh"
     destination = "/tmp/cassy-up/kafka.sh"
   }
 
@@ -87,7 +88,7 @@ resource "null_resource" "provision-kafka" {
       "echo 'export KAFKA_ADVERTISED_HOST_NAME=${element(aws_instance.kafka.*.private_ip, count.index)}' >> /tmp/cassy-up/kafka_params.sh",
       "chmod -R a+x /tmp/cassy-up/*",
       "sudo /tmp/cassy-up/oracle-jdk.sh",
-      "sudo /tmp/cassy-up/kafka.sh"
+      "sudo /tmp/cassy-up/kafka.sh",
     ]
   }
 
@@ -116,7 +117,7 @@ resource "null_resource" "provision-kafka" {
       "echo \"  delete_topic: $KAFKA_DELETE_TOPIC_ENABLE\" | sudo tee --append $KAFKA_DIR/install.yaml",
       "echo \"  num_partitions: $KAFKA_NUM_PARTITIONS\" | sudo tee --append $KAFKA_DIR/install.yaml",
       "echo \"zk:\" | sudo tee --append $KAFKA_DIR/install.yaml",
-      "echo \"  servers: $KAFKA_ZOOKEEPER_SERVERS\" | sudo tee --append $KAFKA_DIR/install.yaml"
+      "echo \"  servers: $KAFKA_ZOOKEEPER_SERVERS\" | sudo tee --append $KAFKA_DIR/install.yaml",
     ]
   }
 }

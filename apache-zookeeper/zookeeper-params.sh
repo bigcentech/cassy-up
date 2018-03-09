@@ -4,9 +4,9 @@ if [ "x$ZOOKEEPER_MY_ID" == "x" ]; then
 fi
 
 echo "exporting variables..."
-if [ "x$ZOOKEEPER_VERSION" == "x" ]; then export ZOOKEEPER_VERSION=3.4.8; fi
+if [ "x$ZOOKEEPER_VERSION" == "x" ]; then export ZOOKEEPER_VERSION=3.4.11; fi
 export ZOOKEEPER_TAR=zookeeper-$ZOOKEEPER_VERSION.tar.gz
-if [ "x$ZOOKEEPER_URL" == "x" ]; then export ZOOKEEPER_URL=https://www.apache.org/dist/zookeeper/zookeeper-$ZOOKEEPER_VERSION/$ZOOKEEPER_TAR; fi
+if [ "x$ZOOKEEPER_URL" == "x" ]; then export ZOOKEEPER_URL=https://archive.apache.org/dist/zookeeper/zookeeper-$ZOOKEEPER_VERSION/$ZOOKEEPER_TAR; fi
 if [ "x$ZOOKEEPER_DOWNLOAD_DIR" == "x" ]; then export ZOOKEEPER_DOWNLOAD_DIR=/usr/local/downloads/zookeeper/zookeeper-$ZOOKEEPER_VERSION; fi
 if [ "x$ZOOKEEPER_ROOT_DIR" == "x" ]; then export ZOOKEEPER_ROOT_DIR=/opt; fi
 if [ "x$ZOOKEEPER_DATA_DIR" == "x" ]; then export ZOOKEEPER_DATA_DIR=/var/lib/zookeeper; fi
