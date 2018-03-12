@@ -1,7 +1,7 @@
 resource "aws_instance" "kafka" {
   count                  = "${var.count}"
   ami                    = "${var.ami_id}"
-  key_name               = "datalake"
+  key_name               = "${var.ssh_key_pair_name}"
   instance_type          = "${var.instance_type}"
   iam_instance_profile   = "${var.iam_instance_profile}"
   subnet_id              = "${element(var.subnet_ids, count.index % length(var.subnet_ids))}"
@@ -83,9 +83,10 @@ resource "null_resource" "provision-kafka" {
 
   provisioner "remote-exec" {
     inline = [
-      "echo 'export KAFKA_BROKER_ID=${count.index+1}' >> /tmp/cassy-up/kafka_params.sh",
-      "echo 'export KAFKA_ZOOKEEPER_SERVERS=${join(",", var.zk_ips)}' >> /tmp/cassy-up/kafka_params.sh",
       "echo 'export KAFKA_ADVERTISED_HOST_NAME=${element(aws_instance.kafka.*.private_ip, count.index)}' >> /tmp/cassy-up/kafka_params.sh",
+      "echo 'export KAFKA_BROKER_ID=${count.index+1}' >> /tmp/cassy-up/kafka_params.sh",
+      "echo 'export KAFKA_HEAP_OPTS=\"${var.jvm_heap_opts}\"' >> /tmp/cassy-up/kafka_params.sh",
+      "echo 'export KAFKA_ZOOKEEPER_SERVERS=${join(",", var.zk_ips)}' >> /tmp/cassy-up/kafka_params.sh",
       "chmod -R a+x /tmp/cassy-up/*",
       "sudo /tmp/cassy-up/oracle-jdk.sh",
       "sudo /tmp/cassy-up/kafka.sh",

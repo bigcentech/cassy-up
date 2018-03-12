@@ -2,7 +2,7 @@ echo "exporting variables..."
 if [ "x$SCALA_VERSION" == "x" ]; then export SCALA_VERSION=2.11; fi
 if [ "x$KAFKA_VERSION" == "x" ]; then export KAFKA_VERSION=0.10.1.0; fi
 export KAFKA_TAR=kafka_$SCALA_VERSION-$KAFKA_VERSION.tgz
-if [ "x$KAFKA_URL" == "x" ]; then export KAFKA_URL=https://www.apache.org/dist/kafka/$KAFKA_VERSION/$KAFKA_TAR; fi
+if [ "x$KAFKA_URL" == "x" ]; then export KAFKA_URL=https://archive.apache.org/dist/kafka/$KAFKA_VERSION/$KAFKA_TAR; fi
 if [ "x$KAFKA_DOWNLOAD_DIR" == "x" ]; then export KAFKA_DOWNLOAD_DIR=/usr/local/downloads/kafka/kafka-$KAFKA_VERSION; fi
 if [ "x$KAFKA_ROOT_DIR" == "x" ]; then export KAFKA_ROOT_DIR=/opt; fi
 if [ "x$KAFKA_DATA_DIR" == "x" ]; then export KAFKA_DATA_DIR=/var/lib/kafka; fi
